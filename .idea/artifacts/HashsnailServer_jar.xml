@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="HashsnailServer:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/HashsnailServer_jar</output-path>
+    <root id="archive" name="HashsnailServer.jar">
+      <element id="module-output" name="HashsnailServer" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/commons-cli/commons-cli/1.5.0/commons-cli-1.5.0.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

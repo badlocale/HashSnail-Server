@@ -1,18 +1,18 @@
 package org.hashsnail.server.model.range;
 
-import org.hashsnail.server.model.range.mask.*;
-
 public class PasswordRange {
     MaskPoint[] mask;
 
-    public PasswordRange(MaskPoint[] mask) {
+    public PasswordRange(MaskPoint[] mask) throws IllegalArgumentException {
         if (mask.length > 0)
             this.mask = mask;
         else
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Password cant have less than one symbol.");
     }
 
-    public PasswordRange(MaskPoint maskPoint, int length) {
+    public PasswordRange(MaskPoint maskPoint, int length) throws IllegalArgumentException {
+        if (length < 1)
+            throw  new IllegalArgumentException("Password cant have less than one symbol.");
         mask = new MaskPoint[length];
         for (int i = 0; i < length; i++) {
             mask[i] = new MaskPoint(maskPoint);
@@ -21,20 +21,20 @@ public class PasswordRange {
 
     public PasswordRange(char[] strMask) throws IllegalArgumentException {
         if (strMask.length % 2 == 1)
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Password cant have less than one symbol.");
 
         mask = new MaskPoint[strMask.length / 2];
         for (int i = 0; i < strMask.length; i += 2) {
             if (strMask[i] == '%') {
                 mask[i / 2] = switch (strMask[i + 1]) {
-                    case 'L' -> new LowerMaskPoint();
-                    case 'U' -> new UpperMaskPoint();
-                    case 'D' -> new DigitMaskPoint();
-                    case 'F' -> new FullMaskPoint();
+                    case 'L' -> new MaskPoint(strMask[i], strMask[i + 1], Alphabets.getLower());
+                    case 'U' -> new MaskPoint(strMask[i], strMask[i + 1], Alphabets.getUpper());
+                    case 'D' -> new MaskPoint(strMask[i], strMask[i + 1], Alphabets.getDigit());
+                    case 'F' -> new MaskPoint(strMask[i], strMask[i + 1], Alphabets.getFull());
                     default -> null;
                 };
             } else if (strMask[i] == '#') {
-                mask[i / 2] = new OneSymbolMaskPoint(strMask[i + 1]);
+                mask[i / 2] = new MaskPoint(strMask[i], strMask[i + 1], new char[] { strMask[i + 1] });
             } else {
                 mask[i / 2] = null;
             }
@@ -42,13 +42,13 @@ public class PasswordRange {
 
         for (int i = 0; i < mask.length; i++) {
             if (mask[i] == null)
-                throw new IllegalArgumentException("Cant identify symbol by number " + i++  + " in mask");
+                throw new IllegalArgumentException("Cant identify symbol by number " + i++  + " in mask.");
         }
     }
 
     public char[] subdivide(float proportion) throws IllegalArgumentException {
         if (proportion > 1 || proportion < 0)
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Argument \"proportion\" takes values between 0 and 1 only.");
 
         if (proportion == 1)
             return getFirstPassword();

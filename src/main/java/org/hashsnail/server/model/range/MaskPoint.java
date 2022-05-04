@@ -1,4 +1,4 @@
-package org.hashsnail.server.model.range.mask;
+package org.hashsnail.server.model.range;
 
 public class MaskPoint {
     protected char precedingSymbol;

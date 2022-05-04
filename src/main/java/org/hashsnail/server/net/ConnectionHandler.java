@@ -29,12 +29,13 @@ public final class ConnectionHandler implements Runnable {
 
         try {
             serverSocket = new ServerSocket(8000);
-            System.out.println(serverSocket); //
         } catch (IOException e) {
             System.err.println("Error when opening the socket...");
             System.exit(-1);
             return;
         }
+
+        System.out.println("Port " + port + " is listening now by address: " + serverSocket.getInetAddress());
 
         while (true) {
             try {
@@ -50,7 +51,8 @@ public final class ConnectionHandler implements Runnable {
 
                 if (isUniqueAddress == true) {
                     clientSockets.add(clientSocket);
-                    System.out.println(clientSockets.get(clientSockets.size() - 1) + " " + clientSockets.size()); //
+                    System.out.println("IP: " + clientSockets.get(clientSockets.size() - 1).getInetAddress().toString() +
+                                       " connected. Clients total: " + clientSockets.size()); //
                 }
 
             } catch (IOException e) {

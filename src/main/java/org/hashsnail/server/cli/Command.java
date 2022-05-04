@@ -1,19 +1,11 @@
 package org.hashsnail.server.cli;
 
+import java.net.Socket;
+import java.util.List;
 import java.util.function.Function;
 
-public abstract class Command {
-    private String commandName;
+public interface Command {
+    String commandName = null;
 
-    public Command (String name, Function function) {
-        this.commandName = name;
-    }
-
-    public String getName() {
-        return  commandName;
-    }
-
-    public void execute(Object o) {
-
-    }
+    public void execute();
 }

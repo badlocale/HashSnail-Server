@@ -8,7 +8,7 @@ public final class Alphabets {
 
     private Alphabets() { }
 
-    public static char[] getFull() { return fullAlphabet.toCharArray(); } //todo algo
+    public static char[] getFull() { return fullAlphabet.toCharArray(); }
 
     public static char[] getDigit() { return digitAlphabet.toCharArray(); }
 

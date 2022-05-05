@@ -159,7 +159,6 @@ public class Server {
         //*** start listening ***
         startListening(port);
 
-
         //*** handle commands ***
         CommandHandler commandHandler = new CommandHandler(System.in);
         while(true) {
@@ -168,6 +167,7 @@ public class Server {
     }
 
     public static void startSessions() {
+        listenerThread.interrupt();
         ExecutorService calculationsThreadPool = Executors.newFixedThreadPool(10);
         for (int i = 0; i < clientSockets.size(); i++) {
             sessions.add(new ServerSession(clientSockets.get(i), attackMode, algoritm));

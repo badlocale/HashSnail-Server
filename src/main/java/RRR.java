@@ -2,7 +2,7 @@ import org.hashsnail.server.model.range.PasswordRange;
 
 public class RRR {
     public static void main(String[] args) {
-        int n = 8;
+        int n = 16;
         float temp = 0;
         float delta = 1F / (float) n;
         PasswordRange passwordRange = new PasswordRange("%L%L%L%L%L%L".toCharArray());

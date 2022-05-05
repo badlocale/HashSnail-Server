@@ -1,7 +1,7 @@
 package org.hashsnail.server.model.range;
 
 public class PasswordRange {
-    MaskPoint[] mask;
+    private MaskPoint[] mask;
 
     public PasswordRange(MaskPoint[] mask) throws IllegalArgumentException {
         if (mask.length > 0)
@@ -47,14 +47,13 @@ public class PasswordRange {
     }
 
     public char[] subdivide(float proportion) throws IllegalArgumentException {
-        if (proportion > 1 || proportion < 0)
-            throw new IllegalArgumentException("Argument \"proportion\" takes values between 0 and 1 only.");
-
-        if (proportion == 1)
+        if (proportion <= 0) {
             return getFirstPassword();
+        }
 
-        if (proportion == 0)
+        if (proportion >= 1) {
             return getLastPassword();
+        }
 
         char[] edgePassword = new char[mask.length];
         int[] base = new int[mask.length]; //rename -> "base"
@@ -87,7 +86,7 @@ public class PasswordRange {
         return  sb.toString();
     }
 
-    public char[] getFirstPassword() {
+    public char[] getLastPassword() {
         char[] endSequence = new char[mask.length];
         for (int i = 0; i < mask.length; i++) {
             endSequence[i] = mask[i].getAlphabet()[mask[i].getAlphabet().length - 1];
@@ -95,7 +94,7 @@ public class PasswordRange {
         return endSequence;
     }
 
-    public char[] getLastPassword() {
+    public char[] getFirstPassword() {
         char[] startSequence = new char[mask.length];
         for (int i = 0; i < mask.length; i++) {
             startSequence[i] = mask[i].getAlphabet()[0];

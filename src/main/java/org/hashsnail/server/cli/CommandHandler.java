@@ -24,7 +24,6 @@ public final class CommandHandler {
             System.arraycopy(line, 1, params, 0, params.length);
 
             Command command = switch (commandName) {
-                case ("benchmark") -> new StartBenchmarkCommand(Server.getAllSessions());
                 case ("start") -> new StartCalculateCommand(Server.getAllSessions());
                 case ("exit") -> new ExitCommand();
                 case ("close") -> new CloseListenerCommand();

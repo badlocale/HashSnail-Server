@@ -10,7 +10,11 @@ public class ServerSession implements Runnable {
     private Socket socket = null;
     private AttackMode attackMode = null;
     private Algorithm algorithm = null;
+
     private double benchmarkResult = -1;
+
+    private final Object BenchMonitor = new Object();
+    private final Object CalculateMonitor = new Object();
     private Boolean isReadyToBenchmark = false;
     private Boolean isReadyToCalculate = false;
 
@@ -22,10 +26,10 @@ public class ServerSession implements Runnable {
 
     @Override
     public void run() {
-        synchronized (isReadyToBenchmark) {
+        synchronized (BenchMonitor) {
             try {
                 while (!isReadyToBenchmark) {
-                    Thread.currentThread().wait();
+                    BenchMonitor.wait();
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -34,15 +38,19 @@ public class ServerSession implements Runnable {
         }
 
         try {
-            requestBenchmark(10);
+            benchmarkResult = requestBenchmark(10);
         } catch (IOException e) {
             System.err.println("Cant send benchmark request for client by address " + socket.getInetAddress() + ".");
         }
 
-        synchronized (isReadyToCalculate) {
+//        if (benchmarkResult > 0) {
+//            isReadyToCalculate = true;
+//        }
+
+        synchronized (CalculateMonitor) {
             try {
                 while (!isReadyToCalculate) {
-                    Thread.currentThread().wait();
+                    CalculateMonitor.wait();
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -53,17 +61,17 @@ public class ServerSession implements Runnable {
         requestWorkData();
     }
 
-    public synchronized void startBenchmark() {
-        isReadyToBenchmark = true;
-        synchronized (isReadyToBenchmark) {
-            notifyAll();
+    public void startBenchmark() {
+        synchronized (BenchMonitor) {
+            isReadyToBenchmark = true;
+            BenchMonitor.notifyAll();
         }
     }
 
-    public synchronized void startCalculate() {
+    public void startCalculate() {
         isReadyToCalculate = true;
-        synchronized (isReadyToBenchmark) {
-            notifyAll();
+        synchronized (CalculateMonitor) {
+            CalculateMonitor.notifyAll();
         }
     }
 
@@ -88,7 +96,7 @@ public class ServerSession implements Runnable {
                 }
             } catch (Exception e) {
                 System.err.println("Client by address " + socket.getInetAddress() +
-                                   "returned not correct benchmark result. Request will be duplicated.");
+                                   " returned not correct benchmark result. Request will be duplicated.");
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException ie) {

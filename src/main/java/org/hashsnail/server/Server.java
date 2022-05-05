@@ -1,21 +1,24 @@
 package org.hashsnail.server;
 
 import org.hashsnail.server.cli.CommandHandler;
+import org.hashsnail.server.model.range.PasswordRange;
 import org.hashsnail.server.net.ConnectionHandler;
 import org.hashsnail.server.model.Algorithm;
 import org.hashsnail.server.model.mods.*;
 import org.apache.commons.cli.*;
 import org.hashsnail.server.net.ServerSession;
 
+import java.awt.event.ItemEvent;
 import java.net.*;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
 
 
 public class Server {
-    private static List<Socket> clientSockets = Collections.synchronizedList(new ArrayList<Socket>());
+    private static final List<ServerSession> sessions = Collections.synchronizedList(new ArrayList<ServerSession>());
+    private static final List<Socket> clientSockets = Collections.synchronizedList(new ArrayList<Socket>());
+    private static Thread listenerThread = null;
     private static AttackMode attackMode = null;
     private static Algorithm algoritm = new Algorithm("MD5", 0, 128);
     private static Path hashFilePath = Paths.get("hash.txt");
@@ -26,7 +29,7 @@ public class Server {
         Integer port = 8000;
 
         //*** Creating a cmd parser ***
-        Options cliOptions = new Options();  //todo добавить option ко всем опциям
+        Options cliOptions = new Options();
 
         Option notDefaultPortOption = new Option("p", "port", true, "port");
         notDefaultPortOption.setArgs(1);
@@ -128,7 +131,7 @@ public class Server {
 
         boolean isAttackModeChosen = false;
         if (cmd.hasOption(bruteforceAttackOption)) {
-            int numberOfElements = Integer.valueOf(cmd.getOptionValue(bruteforceAttackOption)).intValue();
+            int numberOfElements = Integer.parseInt(cmd.getOptionValue(bruteforceAttackOption));
             attackMode = new ClassicBruteforce(numberOfElements);
             isAttackModeChosen = true;
         }
@@ -152,25 +155,45 @@ public class Server {
                 break;
             }
         }
-        
 
         //*** start listening ***
-        ExecutorService listenerThreadPool = Executors.newFixedThreadPool(1);
-        ConnectionHandler listenerThread = new ConnectionHandler(port, clientSockets);
-        Future future = listenerThreadPool.submit(listenerThread);
+        startListening(port);
 
-
-        ExecutorService calculationsThreadPool = Executors.newFixedThreadPool(10);
-        ArrayList<ServerSession> sessions = new ArrayList<>();
-        for (int i = 0; i < sessions.size(); i++) {
-            sessions.add(new ServerSession(clientSockets.get(i), attackMode, algoritm));
-            calculationsThreadPool.submit(sessions.get(i));
-        }
 
         //*** handle commands ***
         CommandHandler commandHandler = new CommandHandler(System.in);
         while(true) {
-            commandHandler.waitCommand();
+            commandHandler.handleCommand();
         }
+    }
+
+    public static void startSessions() {
+        ExecutorService calculationsThreadPool = Executors.newFixedThreadPool(10);
+        for (int i = 0; i < clientSockets.size(); i++) {
+            sessions.add(new ServerSession(clientSockets.get(i), attackMode, algoritm));
+            calculationsThreadPool.submit(sessions.get(i));
+        }
+    }
+
+    public static void startListening(int port) {
+        ConnectionHandler connectionHandler = new ConnectionHandler(port, clientSockets);
+        listenerThread = new Thread(connectionHandler);
+        listenerThread.start();
+    }
+
+    public static List<ServerSession> getAllSessions() {
+        return sessions;
+    }
+
+    public static List<Socket> getAllSockets() {
+        return clientSockets;
+    }
+
+    public static Algorithm getAlgoritm() {
+        return algoritm;
+    }
+
+    public static AttackMode getAttackMode() {
+        return attackMode;
     }
 }

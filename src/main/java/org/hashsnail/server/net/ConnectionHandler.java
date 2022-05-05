@@ -28,7 +28,7 @@ public final class ConnectionHandler implements Runnable {
         boolean isUniqueAddress = true;
 
         try {
-            serverSocket = new ServerSocket(8000);
+            serverSocket = new ServerSocket(port);
         } catch (IOException e) {
             System.err.println("Error when opening the socket...");
             System.exit(-1);

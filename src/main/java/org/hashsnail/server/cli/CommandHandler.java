@@ -1,5 +1,7 @@
 package org.hashsnail.server.cli;
 
+import org.hashsnail.server.Server;
+
 import java.io.*;
 import java.util.Scanner;
 
@@ -10,7 +12,7 @@ public final class CommandHandler {
         this.inputStream = inputStream;
     }
 
-    public void waitCommand() {
+    public void handleCommand() {
         Scanner scanner = new Scanner(inputStream);
         String[] line = scanner.nextLine().split(" ");
         //todo Возможно багует на пустых строках, проверить
@@ -21,21 +23,15 @@ public final class CommandHandler {
             String[] params = new String[line.length - 1];
             System.arraycopy(line, 1, params, 0, params.length);
 
-            switch (commandName) {
-                case ("start"):
-                    System.out.println("start"); //todo
-                    break;
-                case ("exit"):
-                    System.out.println("exit");
-                    break;
-                case ("benchmark"):
-                    System.out.println("benchmark");
-                    break;
-                case ("help"):
-                    System.out.println("help");
-                default:
-                    break;
-            }
+            Command command = switch (commandName) {
+                case ("benchmark") -> new StartBenchmarkCommand(Server.getAllSessions());
+                case ("start") -> new StartCalculateCommand(Server.getAllSessions());
+                case ("exit") -> new ExitCommand();
+                case ("close") -> new CloseListenerCommand();
+                default -> new UnidentifiedCommand();
+            };
+
+            command.execute();
         }
     }
 }

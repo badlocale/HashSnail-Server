@@ -3,16 +3,16 @@ package org.hashsnail.server.model;
 public class Algorithm {
     private String name;
     private int codeNumber;
-    private int bitLength;
+    private int byteLength;
 
-    public Algorithm(String name, int codeNumber, int bitLength) {
+    public Algorithm(String name, int codeNumber, int byteLength) {
         this.name = name;
         this.codeNumber = codeNumber;
-        this.bitLength = bitLength;
+        this.byteLength = byteLength;
     }
 
-    public int getBitLength() {
-        return bitLength;
+    public int getByteLength() {
+        return byteLength;
     }
 
     public int getCodeNumber() {
@@ -25,7 +25,7 @@ public class Algorithm {
     }
 
     public boolean isValidHash(String strHash) {
-        return false;
+        return true;
         //todo
     }
 }

@@ -30,12 +30,12 @@ public final class ConnectionHandler implements Runnable {
         try {
             serverSocket = new ServerSocket(port);
         } catch (IOException e) {
-            System.err.println("Error when opening the socket...");
+            System.err.println("[Connections] Error when opening the socket...");
             System.exit(-1);
             return;
         }
 
-        System.out.println("Port " + port + " is listening now by address: " + serverSocket.getInetAddress());
+        System.out.println("[Connections] Port " + port + " is listening now by address: " + serverSocket.getInetAddress());
 
         while (true) {
             try {
@@ -51,12 +51,12 @@ public final class ConnectionHandler implements Runnable {
 
                 if (isUniqueAddress == true) {
                     clientSockets.add(clientSocket);
-                    System.out.println("IP: " + clientSockets.get(clientSockets.size() - 1).getInetAddress().toString() +
+                    System.out.println("[Connections] IP: " + clientSockets.get(clientSockets.size() - 1).getInetAddress().toString() +
                                        " connected. Clients total: " + clientSockets.size()); //
                 }
 
             } catch (IOException e) {
-                System.err.println("Bind operation failed, or the socket is already bound...");
+                System.err.println("[Connections] Bind operation failed, or the socket is already bound...");
             }
         }
     }

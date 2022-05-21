@@ -5,8 +5,11 @@ public final class Alphabets {
     static final private String lowerAlphabet = "abcdefghijklmnopqrstuvwxyz";
     static final private String upperAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     static final private String digitAlphabet = "0123456789";
+    static final private String abc = "abc";
 
     private Alphabets() { }
+
+    public static char[] getABC() { return abc.toCharArray(); }
 
     public static char[] getFull() { return fullAlphabet.toCharArray(); }
 

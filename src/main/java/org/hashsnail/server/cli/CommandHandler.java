@@ -1,7 +1,5 @@
 package org.hashsnail.server.cli;
 
-import org.hashsnail.server.Server;
-
 import java.io.*;
 import java.util.Scanner;
 
@@ -24,9 +22,8 @@ public final class CommandHandler {
             System.arraycopy(line, 1, params, 0, params.length);
 
             Command command = switch (commandName) {
-                case ("start") -> new StartCalculateCommand(Server.getAllSessions());
+                case ("start") -> new StartCommand();
                 case ("exit") -> new ExitCommand();
-                case ("close") -> new CloseListenerCommand();
                 default -> new UnidentifiedCommand();
             };
 

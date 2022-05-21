@@ -3,13 +3,19 @@ package org.hashsnail.server.model.mods;
 import org.hashsnail.server.model.range.Alphabets;
 import org.hashsnail.server.model.range.MaskPoint;
 import org.hashsnail.server.model.range.PasswordRange;
+import org.hashsnail.server.model.range.URange;
+
+import java.io.IOException;
+import java.io.OutputStream;
 
 public final class ClassicBruteforce extends AttackMode {
-    private PasswordRange passwordRange;
-    private int maxNumberOfElements;
+    private final PasswordRange passwordRange;
+    private final int maxNumberOfElements;
     private float previousPartEnd = 0;
 
-    public ClassicBruteforce(int elementsNumber) throws IllegalArgumentException{
+    public ClassicBruteforce(int elementsNumber) throws IllegalArgumentException {
+        super(ModeType.CLASSIC_BRUTEFORCE.ordinal());
+
         if (elementsNumber < 0) {
             throw new IllegalArgumentException("N must be more than 0. There is no sequence of zero elements");
         }
@@ -17,20 +23,10 @@ public final class ClassicBruteforce extends AttackMode {
         this.maxNumberOfElements = elementsNumber;
     }
 
-    public char[] nextPartOfWork(float delta) {
-        StringBuilder stringBuilder = new StringBuilder();
+    @Override
+    public void writeNextRange(OutputStream out, double entireBenchmark, double personalBenchmark) throws IOException {
 
-        stringBuilder.append(passwordRange.subdivide(previousPartEnd));
-        stringBuilder.append(' ');
-
-        previousPartEnd += delta;
-        if (previousPartEnd > 1) {
-            stringBuilder.append(passwordRange.subdivide(1));
-            previousPartEnd = 0;
-        } else {
-            stringBuilder.append(passwordRange.subdivide(previousPartEnd));
-        }
-
-        return stringBuilder.toString().toCharArray();
     }
+
+
 }

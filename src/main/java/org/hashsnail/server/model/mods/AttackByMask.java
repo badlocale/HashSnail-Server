@@ -1,11 +1,7 @@
 package org.hashsnail.server.model.mods;
 
-import org.hashsnail.server.Server;
 import org.hashsnail.server.model.range.PasswordRange;
-import org.hashsnail.server.model.range.URange;
-import org.hashsnail.server.net.PocketType;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -15,7 +11,7 @@ public final class AttackByMask extends AttackMode {
     private final PasswordRange passwordRange;
 
     public AttackByMask(String rawMask) {
-        super(ModeType.MASK_ATTACK.ordinal());
+        super(ModesIdentifiers.MASK_ATTACK.ordinal());
 
         this.passwordRange = new PasswordRange(rawMask.toCharArray());
     }

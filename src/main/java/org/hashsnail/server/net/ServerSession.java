@@ -54,7 +54,7 @@ public class ServerSession implements Runnable {
 
     private double requestBenchmark(int sec) throws IOException {
         OutputStream out = socket.getOutputStream();
-        String request = ((byte)PocketType.BENCHMARK_REQUEST.ordinal() + " " + sec);
+        String request = ((byte) PocketTypes.BENCHMARK_REQUEST.ordinal() + " " + sec);
         double benchResult = 0;
         String[] response;
 
@@ -62,7 +62,7 @@ public class ServerSession implements Runnable {
         out.flush();
 
         response = readPocket();
-        if (Integer.parseInt(response[0]) == PocketType.BENCHMARK_RESULT.ordinal()
+        if (Integer.parseInt(response[0]) == PocketTypes.BENCHMARK_RESULT.ordinal()
                 && Float.parseFloat(response[1]) > 0) {
             benchResult = Double.parseDouble(response[1]);
         }
@@ -73,50 +73,45 @@ public class ServerSession implements Runnable {
     private void requestWorkData() throws IOException, InterruptedException {
         String[] response;
 
-        sendHash();
+        sendHash(5000);
         sendRange();
 
         response = readPocket();
-        if (Byte.parseByte(response[0]) == PocketType.RESULTS.ordinal()) {
+        if (Byte.parseByte(response[0]) == PocketTypes.RESULTS.ordinal()) {
             for (int i = 1; i < response.length; i += 2) {
                 Server.appendResult(response[i], response[i + 1]);
             }
         }
     }
 
-    private void sendHash() throws IOException {
+    private void sendHash(int clientBufferSize) throws IOException {
         OutputStream out = socket.getOutputStream();
-        String header;
-        String hashData;
-
-        header = (PocketType.HASH_DATA.ordinal() + " ");
+        String header = (PocketTypes.HASH_DATA.ordinal() + " ");
 
         if (Server.getSingleHash() != null) {
-            hashData = Server.getSingleHash();
+            out.write(Server.getSingleHash().getBytes(StandardCharsets.UTF_8));
         } else {
-            try (InputStream fileInputStream = Files.newInputStream(Server.getHashFilePath())) {
-                StringBuilder stringBuilder = new StringBuilder();
+            try (InputStream in = Files.newInputStream(Server.getHashFilePath())) {
+                int hashLength = Server.getAlgorithm().getHashByteLength();
+                int pocketCapacity = clientBufferSize / ((hashLength * 2) + 1);
+                byte[] buffer = new byte[((hashLength * 2) + 1) * pocketCapacity];
+
                 int i = -1;
-
-                while ((i = fileInputStream.read()) != -1) {
-                    stringBuilder.append((char) i);
+                while ((i = in.read(buffer)) != -1) {
+                    out.write(header.getBytes(StandardCharsets.UTF_8));
+                    out.write(buffer, 0, i);
+                    out.write(POCKET_END);
+                    out.flush();
                 }
-
-                hashData = stringBuilder.toString().replace('\n', ' ');
             }
         }
-
-        out.write(header.getBytes(StandardCharsets.UTF_8));
-        out.write(hashData.getBytes(StandardCharsets.UTF_8));
-        out.write(POCKET_END);
-        out.flush();
     }
 
     private void sendRange() throws IOException {
         OutputStream out = socket.getOutputStream();
         String header;
 
-        header = (PocketType.RANGE_DATA.ordinal() + " " +
+        header = (PocketTypes.RANGE_DATA.ordinal() + " " +
                 Server.getAttackMode().toString() + " " +
                 Server.getAlgorithm().toString() + " ");
 
@@ -126,15 +121,6 @@ public class ServerSession implements Runnable {
         out.write(POCKET_END);
         out.flush();
     }
-
-//    private void sendStringData(OutputStream out, String ... data) throws IOException {
-//        for (String dataPart: data) {
-//            out.write(dataPart.getBytes(StandardCharsets.UTF_8));
-//        }
-//
-//        out.write(POCKET_END);
-//        out.flush();
-//    }
 
     private String[] readPocket() throws IOException {
         BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));

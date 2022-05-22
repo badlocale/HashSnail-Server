@@ -11,7 +11,7 @@ public class Algorithm {
         this.byteLength = byteLength;
     }
 
-    public int getByteLength() {
+    public int getHashByteLength() {
         return byteLength;
     }
 

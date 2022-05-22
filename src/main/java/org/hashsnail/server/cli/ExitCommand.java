@@ -6,3 +6,4 @@ public final class ExitCommand implements Command {
         System.exit(0);
     }
 }
+

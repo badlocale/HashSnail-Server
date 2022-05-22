@@ -78,8 +78,6 @@ public class PasswordRange {
         return edgePassword;
     }
 
-
-
     @Override
     public String toString(){
         StringBuilder sb = new StringBuilder();

@@ -4,7 +4,7 @@ import java.io.*;
 import java.util.Scanner;
 
 public final class CommandHandler {
-    private InputStream inputStream;
+    private final InputStream inputStream;
 
     public CommandHandler(InputStream inputStream) {
         this.inputStream = inputStream;

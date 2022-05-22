@@ -1,6 +1,5 @@
 package org.hashsnail.server.model.mods;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -12,7 +11,7 @@ public abstract class AttackMode {
     }
 
     public abstract void writeNextRange(OutputStream out, double entireBenchmark, double personalBenchmark)
-            throws IOException;
+        throws IOException;
 
     @Override
     public String toString() {

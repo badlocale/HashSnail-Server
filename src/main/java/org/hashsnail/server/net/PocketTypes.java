@@ -1,6 +1,6 @@
 package org.hashsnail.server.net;
 
-public enum PocketType {
+public enum PocketTypes {
     BENCHMARK_REQUEST,
     BENCHMARK_RESULT,
     HASH_DATA,

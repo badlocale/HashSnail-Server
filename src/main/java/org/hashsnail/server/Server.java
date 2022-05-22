@@ -19,7 +19,7 @@ public class Server {
     private static final Map<String, String> results = Collections.synchronizedMap(new HashMap<String, String>());
     private static Thread listenerThread = null;
     private static AttackMode attackMode = null;
-    private static Algorithm algorithm = new Algorithm("MD5", 0, 128);
+    private static Algorithm algorithm = new Algorithm("MD5", 0, 16);
     private static Path hashFilePath = Paths.get("hash.txt");
     private static String singleHash = null;
     private static double entireBenchmarkWork = 0;

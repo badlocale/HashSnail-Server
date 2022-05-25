@@ -4,17 +4,20 @@ import org.hashsnail.server.Server;
 
 import java.io.*;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 
 public class ServerSession implements Runnable {
     private static final char POCKET_END = (char) 10;
-    private static final char INTERNAL_DATA_SEPARATOR = (char) 32;
+    private static final char INTERNAL_SEPARATOR = (char) 32;
+    private static final int CLIENTS_BUFFER_SIZE = 65000;
     private final Socket socket;
+    private final PocketWriter pocketWriter;
+    private final PocketHandler pocketReader = null;
     private double benchmarkResult = -1;
     private Boolean isReadyToCalculate = false;
 
-    public ServerSession(Socket socket) {
+    public ServerSession(Socket socket) throws IOException {
+        this.pocketWriter = new PocketWriter(socket.getOutputStream(), CLIENTS_BUFFER_SIZE,
+                INTERNAL_SEPARATOR, POCKET_END);
         this.socket = socket;
     }
 
@@ -24,8 +27,7 @@ public class ServerSession implements Runnable {
             benchmarkResult = requestBenchmark(10);
         } catch (IOException e) {
             System.err.println("[Connections] Cant send benchmark request or receive benchmark " +
-                    "response for client by address " +
-                    socket.getInetAddress() + ".");
+                    "response for client by address " + socket.getInetAddress().getHostAddress() + ".");
         }
 
         isReadyToCalculate = true;
@@ -35,33 +37,33 @@ public class ServerSession implements Runnable {
             ServerSession.class.notifyAll();
 
             try {
-                while (!Server.isEveryoneReady()) {
+                while (!Server.isEveryoneFinishedBenchmark()) {
                     ServerSession.class.wait();
                 }
             } catch (InterruptedException e) {
-                System.err.println("[Connections] Session for address" + socket.getInetAddress() + "is interrupted.");
+                System.err.println("[Connections] Session for address [" + socket.getInetAddress() +
+                        "] is interrupted.");
                 Thread.currentThread().interrupt();
             }
+
+            System.out.println("[Connections] Client by address [" + socket.getInetAddress().getHostAddress() +
+                    "] complete benchmark.");
         }
-        System.out.println(Thread.currentThread().getName() + "complete benchmark"); //todo убрать
 
         try {
             requestWorkData();
         } catch (IOException | InterruptedException e) {
-            e.printStackTrace();//todo
+            e.printStackTrace();//todo обработрать
         }
     }
 
     private double requestBenchmark(int sec) throws IOException {
-        OutputStream out = socket.getOutputStream();
-        String request = ((byte) PocketTypes.BENCHMARK_REQUEST.ordinal() + " " + sec);
         double benchResult = 0;
-        String[] response;
 
-        out.write(request.getBytes(StandardCharsets.UTF_8));
-        out.flush();
+        String request = ((byte) PocketTypes.BENCHMARK_REQUEST.ordinal() + " " + sec);
+        pocketWriter.writeData(request);
 
-        response = readPocket();
+        String[] response = readPocket();
         if (Integer.parseInt(response[0]) == PocketTypes.BENCHMARK_RESULT.ordinal()
                 && Float.parseFloat(response[1]) > 0) {
             benchResult = Double.parseDouble(response[1]);
@@ -71,67 +73,44 @@ public class ServerSession implements Runnable {
     }
 
     private void requestWorkData() throws IOException, InterruptedException {
-        String[] response;
-
-        sendHash(5000);
-        sendRange();
-
-        response = readPocket();
-        if (Byte.parseByte(response[0]) == PocketTypes.RESULTS.ordinal()) {
-            for (int i = 1; i < response.length; i += 2) {
-                Server.appendResult(response[i], response[i + 1]);
-            }
-        }
-    }
-
-    private void sendHash(int clientBufferSize) throws IOException {
-        OutputStream out = socket.getOutputStream();
-        String header = (PocketTypes.HASH_DATA.ordinal() + " ");
-
+        String hashesHeader = (String.valueOf(PocketTypes.HASH_DATA.ordinal()));
         if (Server.getSingleHash() != null) {
-            out.write(Server.getSingleHash().getBytes(StandardCharsets.UTF_8));
+            pocketWriter.writeData(hashesHeader ,Server.getSingleHash());
         } else {
-            try (InputStream in = Files.newInputStream(Server.getHashFilePath())) {
-                int hashLength = Server.getAlgorithm().getHashByteLength();
-                int pocketCapacity = clientBufferSize / ((hashLength * 2) + 1);
-                byte[] buffer = new byte[((hashLength * 2) + 1) * pocketCapacity];
-
-                int i = -1;
-                while ((i = in.read(buffer)) != -1) {
-                    out.write(header.getBytes(StandardCharsets.UTF_8));
-                    out.write(buffer, 0, i);
-                    out.write(POCKET_END);
-                    out.flush();
-                }
-            }
+            pocketWriter.writeDataFromFile(hashesHeader, Server.getHashFilePath(), 0, Long.MAX_VALUE);
         }
-    }
 
-    private void sendRange() throws IOException {
-        OutputStream out = socket.getOutputStream();
-        String header;
+        String rangeHeader = Server.getAttackMode().toString();
+        Server.getAttackMode().writeDataAsPocket(pocketWriter, rangeHeader,
+                benchmarkResult, Server.getEntireBenchmarkWork());
 
-        header = (PocketTypes.RANGE_DATA.ordinal() + " " +
-                Server.getAttackMode().toString() + " " +
-                Server.getAlgorithm().toString() + " ");
+        String[] response = readPocket();
+        if (Byte.parseByte(response[0]) == PocketTypes.RESULTS.ordinal() && response[1] != null) {
+            String time = response[1];
 
-        out.write(header.getBytes(StandardCharsets.UTF_8));
-        Server.getAttackMode().writeNextRange(out ,benchmarkResult, Server.getEntireBenchmarkWork());
+            System.out.println("[Connections] Received results from address " + socket.getInetAddress() +
+                    ". Calculation time: " + time);
 
-        out.write(POCKET_END);
-        out.flush();
+            for (int i = 2; i < response.length; i += 2) {
+                Server.appendCalculatedPasswords(response[i], response[i + 1]);
+                System.out.println("[Connections] " + response[i] + " " + response[i + 1]);
+            }
+        } else {
+            System.out.println("[Connections] Results from address " + socket.getInetAddress() +
+                    " received in wrong format");
+        }
     }
 
     private String[] readPocket() throws IOException {
         BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         StringBuilder stringBuilder = new StringBuilder();
-        byte i = -1;
+        byte i;
 
         while ((i = (byte)in.read()) != POCKET_END) {
             stringBuilder.append((char) i);
         }
 
-        return stringBuilder.toString().split(String.valueOf(INTERNAL_DATA_SEPARATOR));
+        return stringBuilder.toString().split(String.valueOf(INTERNAL_SEPARATOR));
     }
 
     public boolean isReady() {

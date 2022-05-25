@@ -27,7 +27,6 @@ public class PasswordRange {
         for (int i = 0; i < strMask.length; i += 2) {
             if (strMask[i] == '%') {
                 mask[i / 2] = switch (strMask[i + 1]) {
-                    case 'A' -> new MaskPoint(strMask[i], strMask[i + 1], Alphabets.getABC());
                     case 'L' -> new MaskPoint(strMask[i], strMask[i + 1], Alphabets.getLower());
                     case 'U' -> new MaskPoint(strMask[i], strMask[i + 1], Alphabets.getUpper());
                     case 'D' -> new MaskPoint(strMask[i], strMask[i + 1], Alphabets.getDigit());
@@ -43,7 +42,7 @@ public class PasswordRange {
 
         for (int i = 0; i < mask.length; i++) {
             if (mask[i] == null)
-                throw new IllegalArgumentException("Cant identify symbol by number " + i++  + " in mask.");
+                throw new IllegalArgumentException("Cant identify symbol by number " + i  + " in mask.");
         }
     }
 

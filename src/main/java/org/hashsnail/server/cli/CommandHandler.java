@@ -13,7 +13,6 @@ public final class CommandHandler {
     public void handleCommand() {
         Scanner scanner = new Scanner(inputStream);
         String[] line = scanner.nextLine().split(" ");
-        //todo Возможно багует на пустых строках, проверить
 
         if (line[0].startsWith("/")) {
             String commandName = line[0].substring(1);

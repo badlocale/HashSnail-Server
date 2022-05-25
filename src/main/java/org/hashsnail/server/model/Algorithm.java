@@ -1,18 +1,14 @@
 package org.hashsnail.server.model;
 
 public class Algorithm {
-    private String name;
-    private int codeNumber;
-    private int byteLength;
+    private final String name;
+    private final int codeNumber;
+    private final int byteLength;
 
     public Algorithm(String name, int codeNumber, int byteLength) {
         this.name = name;
         this.codeNumber = codeNumber;
         this.byteLength = byteLength;
-    }
-
-    public int getHashByteLength() {
-        return byteLength;
     }
 
     public int getCodeNumber() {
@@ -21,11 +17,18 @@ public class Algorithm {
 
     @Override
     public String toString() {
-        return name;
+        return String.valueOf(name);
     }
 
-    public boolean isValidHash(String strHash) {
+    public boolean isValidHashes(String ... hashes) {
+        String pattern = "\\w{" + byteLength + "}$";
+
+        for (String hash : hashes) {
+            if (!hash.matches(pattern)) {
+                return false;
+            }
+        }
+
         return true;
-        //todo
     }
 }

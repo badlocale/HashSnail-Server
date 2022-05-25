@@ -5,8 +5,8 @@ import java.io.*;
 import java.util.*;
 
 public final class ConnectionHandler implements Runnable {
-    private List<Socket> clientSockets;
-    private int port;
+    private final List<Socket> clientSockets;
+    private final int port;
 
     public ConnectionHandler(int port, List<Socket> clientSockets) {
         if (1 <= port && port <= 65535) {
@@ -17,15 +17,11 @@ public final class ConnectionHandler implements Runnable {
         this.clientSockets = clientSockets;
     }
 
-    public int getPort() {
-        return port;
-    }
-
     @Override
     public void run() {
         ServerSocket serverSocket;
         Socket clientSocket;
-        boolean isUniqueAddress = true;
+        boolean isUniqueAddress;
 
         try {
             serverSocket = new ServerSocket(port);
@@ -35,7 +31,12 @@ public final class ConnectionHandler implements Runnable {
             return;
         }
 
-        System.out.println("[Connections] Port " + port + " is listening now by address: " + serverSocket.getInetAddress());
+        try {
+            System.out.println("[Connections] Port " + port + " is listening now by address: " +
+                    InetAddress.getLocalHost().getHostAddress());
+        } catch (UnknownHostException e) {
+            System.err.println("[Connections] Cant get host IP address.");
+        }
 
         while (true) {
             try {
@@ -43,18 +44,18 @@ public final class ConnectionHandler implements Runnable {
 
                 isUniqueAddress = true;
                 for (Socket s: clientSockets) {
-                    String storedAddress = s.getInetAddress().getHostName();
+                    String storedAddress = s.getInetAddress().getHostAddress();
                     String newAddress = clientSocket.getInetAddress().getHostName();
                     if (storedAddress.equals(newAddress))
                         isUniqueAddress = false;
                 }
 
-                if (isUniqueAddress == true) {
+                if (isUniqueAddress) {
                     clientSockets.add(clientSocket);
-                    System.out.println("[Connections] IP: " + clientSockets.get(clientSockets.size() - 1).getInetAddress().toString() +
-                                       " connected. Clients total: " + clientSockets.size()); //
+                    System.out.println("[Connections] New client with IP: " +
+                            clientSockets.get(clientSockets.size() - 1).getInetAddress().getHostAddress() +
+                            " connected. Clients total: " + clientSockets.size()); //
                 }
-
             } catch (IOException e) {
                 System.err.println("[Connections] Bind operation failed, or the socket is already bound...");
             }

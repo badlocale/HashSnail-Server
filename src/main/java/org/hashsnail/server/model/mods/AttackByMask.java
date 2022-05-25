@@ -1,34 +1,36 @@
 package org.hashsnail.server.model.mods;
 
+import org.hashsnail.server.Server;
 import org.hashsnail.server.model.range.PasswordRange;
+import org.hashsnail.server.net.PocketTypes;
+import org.hashsnail.server.net.PocketWriter;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 
 public final class AttackByMask extends AttackMode {
-    private float previousPartEnd = 0;
+    private volatile float previousPartEnd = 0;
     private final PasswordRange passwordRange;
 
     public AttackByMask(String rawMask) {
-        super(ModesIdentifiers.MASK_ATTACK.ordinal());
+        super(PocketTypes.MASK_DATA.ordinal());
 
         this.passwordRange = new PasswordRange(rawMask.toCharArray());
     }
 
-    @Override
-    public void writeNextRange(OutputStream out, double entireBenchmark, double personalBenchmark) throws IOException {
+    public void writeDataAsPocket(PocketWriter writer, String header, double entireBenchmark, double personalBenchmark)
+            throws IOException {
         double proportion = entireBenchmark / personalBenchmark;
 
-        out.write(nextPasswordRange(proportion).getBytes(StandardCharsets.UTF_8));
+        System.out.println(entireBenchmark + " " + personalBenchmark + Thread.currentThread().getName());
+
+        writer.writeData(
+            String.valueOf(PocketTypes.MASK_DATA.ordinal()),
+            passwordRange.toString(),
+            String.valueOf(Server.getAlgorithm().getCodeNumber()),
+            nextPasswordRange(proportion));
     }
 
-    @Override
-    public String toString() {
-        return super.modeValue + " " + passwordRange.toString();
-    }
-
-    private String nextPasswordRange(double delta) {
+    public synchronized String nextPasswordRange(double delta) { //todo
         StringBuilder stringBuilder = new StringBuilder();
 
         stringBuilder.append(passwordRange.subdivide(previousPartEnd));

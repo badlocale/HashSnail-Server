@@ -21,8 +21,6 @@ public final class AttackByMask extends AttackMode {
             throws IOException {
         double proportion = entireBenchmark / personalBenchmark;
 
-        System.out.println(entireBenchmark + " " + personalBenchmark + Thread.currentThread().getName());
-
         writer.writeData(
             String.valueOf(PocketTypes.MASK_DATA.ordinal()),
             passwordRange.toString(),

@@ -10,7 +10,7 @@ import java.nio.file.Path;
 public final class AttackByDictionary extends AttackMode {
     private final Path dictionaryPath;
     private final long fileSize;
-    private long totalBytesSent = 0;
+    private volatile long totalBytesSent = 0;
     private long bytesNotSent = 0;
 
     public AttackByDictionary(Path dictionaryPath) {

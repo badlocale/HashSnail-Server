@@ -8,7 +8,7 @@ import java.net.Socket;
 public class ServerSession implements Runnable {
     private static final char POCKET_END = (char) 10;
     private static final char INTERNAL_SEPARATOR = (char) 32;
-    private static final int CLIENTS_BUFFER_SIZE = 65000;
+    private static final int CLIENTS_BUFFER_SIZE = 50000;
     private final Socket socket;
     private final PocketWriter pocketWriter;
     private final PocketHandler pocketReader = null;
@@ -24,7 +24,7 @@ public class ServerSession implements Runnable {
     @Override
     public void run() {
         try {
-            benchmarkResult = requestBenchmark(10);
+            benchmarkResult = requestBenchmark(5);
         } catch (IOException e) {
             System.err.println("[Connections] Cant send benchmark request or receive benchmark " +
                     "response for client by address " + socket.getInetAddress().getHostAddress() + ".");
@@ -41,13 +41,13 @@ public class ServerSession implements Runnable {
                     ServerSession.class.wait();
                 }
             } catch (InterruptedException e) {
-                System.err.println("[Connections] Session for address [" + socket.getInetAddress() +
+                System.err.println("[Connections] Session for address " + socket.getInetAddress().getHostAddress() +
                         "] is interrupted.");
                 Thread.currentThread().interrupt();
             }
 
-            System.out.println("[Connections] Client by address [" + socket.getInetAddress().getHostAddress() +
-                    "] complete benchmark.");
+            System.out.println("[Connections] Client by address " + socket.getInetAddress().getHostAddress() +
+                    " complete benchmark. Productivity: " + String.format("%.2f",benchmarkResult) + "MH/s");
         }
 
         try {
@@ -88,15 +88,16 @@ public class ServerSession implements Runnable {
         if (Byte.parseByte(response[0]) == PocketTypes.RESULTS.ordinal() && response[1] != null) {
             String time = response[1];
 
-            System.out.println("[Connections] Received results from address " + socket.getInetAddress() +
-                    ". Calculation time: " + time);
+            System.out.println("[Connections] Received results from address " +
+                    socket.getInetAddress().getHostAddress() + ". Calculation time: " + time);
 
             for (int i = 2; i < response.length; i += 2) {
                 Server.appendCalculatedPasswords(response[i], response[i + 1]);
-                System.out.println("[Connections] " + response[i] + " " + response[i + 1]);
+                System.out.println("              " + response[i] + " " + response[i + 1]);
+
             }
         } else {
-            System.out.println("[Connections] Results from address " + socket.getInetAddress() +
+            System.out.println("[Connections] Results from address " + socket.getInetAddress().getHostAddress() +
                     " received in wrong format");
         }
     }

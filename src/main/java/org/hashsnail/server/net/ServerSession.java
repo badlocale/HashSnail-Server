@@ -11,7 +11,6 @@ public class ServerSession implements Runnable {
     private static final int CLIENTS_BUFFER_SIZE = 50000;
     private final Socket socket;
     private final PocketWriter pocketWriter;
-    private final PocketHandler pocketReader = null;
     private double benchmarkResult = -1;
     private Boolean isReadyToCalculate = false;
 
@@ -53,7 +52,7 @@ public class ServerSession implements Runnable {
         try {
             requestWorkData();
         } catch (IOException | InterruptedException e) {
-            e.printStackTrace();//todo обработрать
+            e.printStackTrace();
         }
     }
 

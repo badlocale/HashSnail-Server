@@ -28,7 +28,7 @@ public final class AttackByMask extends AttackMode {
             nextPasswordRange(proportion));
     }
 
-    public synchronized String nextPasswordRange(double delta) { //todo
+    public synchronized String nextPasswordRange(double delta) {
         StringBuilder stringBuilder = new StringBuilder();
 
         stringBuilder.append(passwordRange.subdivide(previousPartEnd));

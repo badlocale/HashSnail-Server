@@ -24,16 +24,18 @@ public final class AttackByDictionary extends AttackMode {
     public void writeDataAsPocket(PocketWriter writer, String header, double entireBenchmark, double personalBenchmark)
             throws IOException {
         double proportion = personalBenchmark / entireBenchmark;
-        System.out.println("fileSize: " + fileSize); //todo
+        System.out.println("fileSize: " + fileSize);
         long dataSize = (long) (fileSize * proportion) + bytesNotSent;
-        System.out.println("dataSize: " + dataSize); //todo
+        System.out.println("dataSize: " + dataSize);
         long bytesSent = writer.writeDataFromFile(String.valueOf(PocketTypes.DICTIONARY_DATA.ordinal()), dictionaryPath,
                 totalBytesSent, dataSize);
-        System.out.println("bytesSent: " + bytesSent); //todo
-        totalBytesSent += bytesSent;
-        System.out.println("totalBytesSent: " + totalBytesSent); //todo
+        System.out.println("bytesSent: " + bytesSent);
+        synchronized (this) {
+            totalBytesSent += bytesSent;
+        }
+        System.out.println("totalBytesSent: " + totalBytesSent);
         bytesNotSent = dataSize - bytesSent;
-        System.out.println("bytesNotSent: " + bytesNotSent); //todo
+        System.out.println("bytesNotSent: " + bytesNotSent);
 
         writer.writeData(String.valueOf(PocketTypes.DICTIONARY_START.ordinal()) ,
                 String.valueOf(Server.getAlgorithm().getCodeNumber()));

@@ -69,7 +69,7 @@ public class PocketWriter {
                 }
             }
         } catch (InterruptedException | IOException e) {
-            e.printStackTrace(); //todo убрать sleep и хендл исключения
+            e.printStackTrace();
         }
         return bytesWritten;
     }

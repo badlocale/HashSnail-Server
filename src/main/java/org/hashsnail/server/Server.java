@@ -21,8 +21,11 @@ import java.util.HashMap;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Server {
+    private static final Logger logger = LoggerFactory.getLogger(Server.class);
     private static final List<ServerSession> sessions = Collections.synchronizedList(new ArrayList<>());
     private static final List<Socket> clientSockets = Collections.synchronizedList(new ArrayList<>());
     private static final Map<String, String> results = Collections.synchronizedMap(new HashMap<>());
@@ -85,7 +88,7 @@ public class Server {
                 calculationsThreadPool.submit(sessions.get(i));
             }
         } catch (IOException e) {
-            e.printStackTrace(); //todo
+            e.printStackTrace();
         }
 
     }

@@ -56,21 +56,21 @@ public class PasswordRange {
         }
 
         char[] edgePassword = new char[mask.length];
-        int[] base = new int[mask.length];
+        int[] capacity = new int[mask.length];
         long decimalRepresentation = 1;
         long symbolIndex;
 
-        base[mask.length - 1] = 1;
+        capacity[mask.length - 1] = 1;
         for (int i = mask.length - 2; i >= 0; i--) {
-            base[i] = mask[i + 1].getAlphabet().length * base[i + 1];
+            capacity[i] = mask[i + 1].getAlphabet().length * capacity[i + 1];
         }
-        decimalRepresentation = (long) base[0] * mask[0].getAlphabet().length;
+        decimalRepresentation = (long) capacity[0] * mask[0].getAlphabet().length;
 
         decimalRepresentation *= proportion;
 
         for(int i = 0; i < mask.length; i++) {
-            symbolIndex = decimalRepresentation / base[i];
-            decimalRepresentation %= base[i];
+            symbolIndex = decimalRepresentation / capacity[i];
+            decimalRepresentation %= capacity[i];
             edgePassword[i] = mask[i].getAlphabet()[(int) symbolIndex];
         }
 

@@ -39,4 +39,7 @@ The main idea is to divide amount of work among clients based on their relative 
     - `U` "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     - `F` "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 - `#` is used with any symbol to explicitly specify an already known character in potential password
-  
+
+# Client
+[Client side application repository made by my colleague on the University DSA course final project](https://github.com/rebmanop/Hashsnail-Client)
+

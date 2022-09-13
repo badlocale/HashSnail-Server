@@ -35,7 +35,7 @@ public class ArgumentsParser {
         notDefaultPortOption.setOptionalArg(true);
         notDefaultPortOption.setArgName("port for listening");
 
-        Option algorithmToAttackOption = new Option("a", "algoritm", true, "hash algoritm");
+        Option algorithmToAttackOption = new Option("a", "algorithm", true, "hash algoritm");
         algorithmToAttackOption.setArgs(1);
         algorithmToAttackOption.setOptionalArg(false);
         algorithmToAttackOption.setArgName("hash algoritm naming");
